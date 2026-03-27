@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ST-EMS | NEON PLATINUM OS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+        :root { 
+            --neon-red: #ff003c; --neon-blue: #00f3ff; --neon-green: #39ff14;
+            --bg-blur: rgba(15, 15, 20, 0.85); --gold: #ffcf33;
+        }
+
+        * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        body { 
+            background: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover; font-family: 'Rajdhani', sans-serif; color: #fff; margin: 0; height: 100vh; overflow: hidden;
+        }
+
+        /* Arka Plan Karartma Katmanı */
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: -1; }
+
+        /* GİRİŞ EKRANI (FUTURİSTİK) */
+        #auth-screen {
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(15px);
+        }
+        .auth-box {
+            background: var(--bg-blur); padding: 50px; border-radius: 30px; border: 2px solid var(--neon-red);
+            text-align: center; box-shadow: 0 0 50px var(--neon-red); width: 450px;
+        }
+        .auth-box h1 { font-family: 'Orbitron', sans-serif; letter-spacing: 5px; color: var(--neon-red); }
+
+        /* ANA PANEL TASARIMI */
+        #main-app { display: none; height: 100vh; grid-template-columns: 300px 1fr; }
+
+        .sidebar { 
+            background: rgba(0, 0, 0, 0.9); border-right: 1px solid var(--neon-red); 
+            padding: 30px; display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .nav-btn {
+            background: transparent; border: 1px solid #333; color: #aaa; padding: 15px;
+            border-radius: 10px; cursor: pointer; text-align: left; font-size: 18px; font-weight: bold;
+        }
+        .nav-btn:hover, .nav-btn.active { 
+            background: linear-gradient(90deg, var(--neon-red), transparent); 
+            color: white; border-color: var(--neon-red); padding-left: 25px;
+        }
+
+        /* İÇERİK ALANI */
+        .main-content { padding: 40px; overflow-y: auto; backdrop-filter: blur(5px); }
+        
+        /* CARD SİSTEMİ (Glassmorphism) */
+        .grid-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+        .card { 
+            background: var(--bg-blur); border: 1px solid rgba(255,255,255,0.1); 
+            padding: 25px; border-radius: 20px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--neon-red));
+            animation: rotate 4s linear infinite; z-index: -1;
+        }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+        /* MARKET & ENVANTER */
+        .market-item {
+            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px;
+            border: 1px solid #444; text-align: center;
+        }
+        .market-item:hover { border-color: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
+
+        /* MESAI BUTONU */
+        .duty-glow {
+            font-size: 30px; font-family: 'Orbitron'; color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue); margin: 20px 0;
+        }
+        .action-btn {
+            background: var(--neon-red); border: none; color: white; padding: 20px 40px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 20px;
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        input { background: #111; border: 1px solid #333; color: white; padding: 15px; border-radius: 10px; width: 100%; margin: 10px 0; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+<div class="overlay"></div>
+
+<div id="auth-screen">
+    <div class="auth-box">
+        <h1>ST-OS 5.0</h1>
+        <div id="login-form">
+            <input type="text" id="user-in" placeholder="SİCİL ADI">
+            <input type="password" id="pass-in" placeholder="ERİŞİM ŞİFRESİ">
+            <button class="action-btn" onclick="login()" style="width:100%; margin-top:20px;">SİSTEME SIZ</button>
+            <p onclick="toggleAuth(false)" style="cursor:pointer; margin-top:15px; color:var(--neon-blue)">Yeni Kayıt Oluştur</p>
+        </div>
+        <div id="register-form" class="hidden">
+            <input type="text" id="reg-user" placeholder="YENİ SİCİL KAYDI">
+            <input type="password" id="reg-pass" placeholder="ŞİFRE BELİRLE">
+            <button class="action-btn" onclick="register()" style="width:100%; background:var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue);">VERİTABANINA EKLE</button>
+            <p onclick="toggleAuth(true)" style="cursor:pointer; margin-top:15px;">Giriş Ekranına Dön</p>
+        </div>
+    </div>
+</div>
+
+<div id="main-app">
+    <aside class="sidebar">
+        <div style="text-align:center; padding:20px 0;">
+            <div style="width:80px; height:80px; background:var(--neon-red); border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px var(--neon-red)">
+                <i class="fa-solid fa-user-nurse fa-2x"></i>
+            </div>
+            <h2 id="p-name" style="font-family:'Orbitron'; margin-top:15px;">MEMUR</h2>
+            <div style="color:var(--gold); font-size:20px;"><i class="fa-solid fa-coins"></i> <span id="p-coins">0</span></div>
+        </div>
+        <button class="nav-btn active" onclick="showPage('dash')"><i class="fa-solid fa-house"></i> KOMUTA MERKEZİ</button>
+        <button class="nav-btn" onclick="showPage('market')"><i class="fa-solid fa-cart-shopping"></i> EKİPMAN DEPOSU</button>
+        <button class="nav-btn" onclick="showPage('archive')"><i class="fa-solid fa-database"></i> VAKA ARŞİVİ</button>
+        <button class="nav-btn" onclick="logout()" style="margin-top:auto; color:var(--neon-red)"><i class="fa-solid fa-power-off"></i> SİSTEMİ KAPAT</button>
+    </aside>
+
+    <main class="main-content">
+        <div id="page-dash">
+            <h1 style="font-family:'Orbitron'; border-bottom:1px solid #333; padding-bottom:10px;">CANLI TERMİNAL</h1>
+            <div class="grid-stats">
+                <div class="card"><h3>12</h3><p>AKTİF VAKA</p></div>
+                <div class="card"><h3>04</h3><p>BOŞTA BİRİM</p></div>
+                <div class="card"><h3>%100</h3><p>SİSTEM DURUMU</p></div>
+                <div class="card"><h3 style="color:var(--gold)" id="total-h">0</h3><p>TOPLAM MESAİ (S)</p></div>
+            </div>
+
+            <div style="background:var(--bg-blur); padding:50px; border-radius:30px; text-align:center; border:1px solid var(--neon-blue)">
+                <h2 style="font-family:'Orbitron'">MESAİ TAKİP TERMİNALİ</h2>
+                <div id="timer" class="duty-glow">00:00:00</div>
+                <button id="duty-btn" class="action-btn" onclick="toggleDuty()">MESAİ BAŞLAT</button>
+            </div>
+        </div>
+
+        <div id="page-market" class="hidden">
+            <h1 style="font-family:'Orbitron'">EKİPMAN DEPOSU</h1>
+            <div class="grid-stats" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="market-item">
+                    <i class="fa-solid fa-helicopter fa-3x" style="color:var(--neon-blue)"></i>
+                    <h3>Med-Evac Helikopter</h3>
+                    <p class="price">50 COIN</p>
+                    <button class="action-btn" style="font-size:14px; padding:10px 20px;" onclick="buy(50)">SATIN AL</button>
+                </div>
+                <div class="market-item">
+                    <i class="fa-solid fa-id-card-clip fa-3x" style="color:var(--neon-green)"></i>
+                    <h3>Başhekim Yetki Kartı</h3>
+                    <p class="price">100 COIN</p>
+                    <button class="action-btn" style="font-size:14px; padding:10px 20px;" onclick="buy(100)">SATIN AL</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let user = null; let tInt; let sTime;
+
+    function toggleAuth(l) { document.getElementById('login-form').classList.toggle('hidden', !l); document.getElementById('register-form').classList.toggle('hidden', l); }
+
+    function register() {
+        let u = document.getElementById('reg-user').value; let p = document.getElementById('reg-pass').value;
+        if(!u || !p) return alert("Hata!");
+        localStorage.setItem('ems_'+u, JSON.stringify({u, p, c:0, h:0}));
+        alert("Sisteme eklendin!"); toggleAuth(true);
+    }
+
+    function login() {
+        let u = document.getElementById('user-in').value; let p = document.getElementById('pass-in').value;
+        let data = JSON.parse(localStorage.getItem('ems_'+u));
+        if(data && data.p === p) { user = data; start(); } else alert("Erişim Reddedildi!");
+    }
+
+    function start() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-app').style.display = 'grid';
+        update();
+    }
+
+    function update() {
+        document.getElementById('p-name').innerText = user.u;
+        document.getElementById('p-coins').innerText = user.c;
+        document.getElementById('total-h').innerText = user.h;
+        localStorage.setItem('ems_'+user.u, JSON.stringify(user));
+    }
+
+    function showPage(p) {
+        document.getElementById('page-dash').classList.toggle('hidden', p !== 'dash');
+        document.getElementById('page-market').classList.toggle('hidden', p !== 'market');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function toggleDuty() {
+        let btn = document.getElementById('duty-btn');
+        if(!tInt) {
+            sTime = new Date();
+            tInt = setInterval(() => {
+                let d = new Date() - sTime;
+                let h = Math.floor(d/3600000); let m = Math.floor((d%3600000)/60000); let s = Math.floor((d%60000)/1000);
+                document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+            btn.innerText = "MESAİYİ DURDUR"; btn.style.background = "#555";
+        } else {
+            let hrs = Math.floor((new Date() - sTime) / 3600000);
+            clearInterval(tInt); tInt = null;
+            if(hrs > 0) { user.c += hrs; user.h += hrs; alert(hrs + " Coin kazandın!"); }
+            document.getElementById('timer').innerText = "00:00:00";
+            btn.innerText = "MESAİ BAŞLAT"; btn.style.background = "var(--neon-red)";
+            update();
+        }
+    }
+
+    function buy(p) { if(user.c >= p) { user.c -= p; alert("Başarılı!"); update(); } else alert("Coin yetersiz!"); }
+    function logout() { location.reload(); }
+</script>
+</body>
+</html>
